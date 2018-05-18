@@ -23,7 +23,7 @@ public class DefaultGitHubService implements GitHubService {
     }
 
     @Override
-    public Mono<Repository> getRepository(String owner, String repositoryName) {
+    public Mono<Repository> findRepository(String owner, String repositoryName) {
         URI uri = UriComponentsBuilder
                 .fromHttpUrl(GITHUB_URL_TEMPLATE)
                 .buildAndExpand(owner, repositoryName)

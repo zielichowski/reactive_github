@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
@@ -22,6 +23,9 @@ public class ApiConfiguration {
                     options.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000);
 
                 });
+
+
+
 
         return WebClient.builder()
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, VND_GITHUB_V3)

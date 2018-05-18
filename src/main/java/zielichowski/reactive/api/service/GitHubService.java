@@ -4,5 +4,5 @@ import zielichowski.reactive.api.model.Repository;
 import reactor.core.publisher.Mono;
 
 public interface GitHubService {
-    Mono<Repository> getRepository(String owner, String repositoryName);
+    Mono<Repository> findRepository(String owner, String repositoryName);
 }
