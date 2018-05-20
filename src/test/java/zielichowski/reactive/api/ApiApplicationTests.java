@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToIgnoreCase;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static io.restassured.RestAssured.given;
@@ -44,11 +45,18 @@ public class ApiApplicationTests {
                         ));
         wireMockServer.
                 stubFor(get(urlEqualTo(GITHUB_URL))
+
                         .willReturn(OkResponse()
                         ));
+        wireMockServer.
+                stubFor(get(urlEqualTo(GITHUB_URL))
+                        .withHeader("If-None-Match", equalToIgnoreCase("1234"))
+                        .willReturn(NotModifiedResponse()));
 
 
     }
+
+
     @After
     public void tearDown() {
         wireMockServer.stop();
@@ -56,15 +64,15 @@ public class ApiApplicationTests {
 
     @Test
     public void shouldReturnRepository() {
-        given().
+                given().
                 port(randomServerPort).
                 when().
                 get(API_URL).
                 then().
                 statusCode(200)
-                .body("full_name", equalTo("zielichowski"))
+                .body("fullName", equalTo("zielichowski"))
                 .body("description", equalTo("Test description"))
-                .body("clone_url", equalTo("some clone url"));
+                .body("cloneUrl", equalTo("some clone url"));
 
 
     }
@@ -92,28 +100,54 @@ public class ApiApplicationTests {
 
     }
 
+    @Test
+    public void shouldReturnNotModified() {
+        given().
+                header("If-None-Match","1234").
+                port(randomServerPort).
+                when().
+                get(API_URL).
+                then().
+                statusCode(304)
+                ;
+    }
+
     private ResponseDefinitionBuilder errorResponse() {
         ResponseDefinitionBuilder responseDefinitionBuilder = new ResponseDefinitionBuilder();
         responseDefinitionBuilder.withBody("some message").withStatus(200).withFault(Fault.MALFORMED_RESPONSE_CHUNK).withHeader("Content-Type", "application/json");
         return responseDefinitionBuilder;
     }
 
-    private void startWireMockServer() {
-        wireMockServer = new WireMockServer(9000);
-        wireMockServer.start();
+    private ResponseDefinitionBuilder NotModifiedResponse() {
+        ResponseDefinitionBuilder responseDefinitionBuilder = new ResponseDefinitionBuilder();
+        responseDefinitionBuilder.withStatus(304);
+
+        return responseDefinitionBuilder;
     }
+
 
     private ResponseDefinitionBuilder OkResponse() {
         ResponseDefinitionBuilder responseDefinitionBuilder = new ResponseDefinitionBuilder();
         JSONObject repository = new JSONObject();
-        repository.put("full_name", "zielichowski");
         repository.put("description", "Test description");
         repository.put("clone_url", "some clone url");
+        repository.put("full_name", "zielichowski");
         repository.put("stargazers_count", "0");
         repository.put("created_at", LocalDateTime.now().toString());
+
+
+
         responseDefinitionBuilder
-                .withBody(repository.toString()).withStatus(200).withHeader("Content-Type", "application/json");
+                .withBody(repository.toString()).withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withHeader("eTag","1234");
         return responseDefinitionBuilder;
+    }
+
+
+    private void startWireMockServer() {
+        wireMockServer = new WireMockServer(9000);
+        wireMockServer.start();
     }
 
 }
