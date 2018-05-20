@@ -1,6 +1,5 @@
 package zielichowski.reactive.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.EqualsAndHashCode;
@@ -14,7 +13,6 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Slf4j
 @EqualsAndHashCode
-@JsonIgnoreProperties(ignoreUnknown = true)
 public final class Repository {
 
     private Repository(String fullName, String description, String cloneUrl, int stars, LocalDateTime createdAt) {
